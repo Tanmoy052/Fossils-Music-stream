@@ -1,0 +1,7 @@
+{
+  "name": "Fossils Music Stream",
+  "description": "A premium Spotify-inspired music streaming platform for Rupam Islam & Fossils, featuring dark mode, lyrics, and seamless playback.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
