@@ -1,14 +1,31 @@
 import React from "react";
 
-export const FooterLinks: React.FC = () => {
+export const FooterLinks = () => {
   return (
-    <div className="border-t border-white/10 px-8 py-6 text-sm text-zinc-400 flex flex-wrap gap-x-8 gap-y-3">
-      <button className="hover:text-white transition">Legal</button>
-      <button className="hover:text-white transition">Safety & Privacy Center</button>
-      <button className="hover:text-white transition">Privacy Policy</button>
-      <button className="hover:text-white transition">Cookies</button>
-      <button className="hover:text-white transition">About Ads</button>
-      <button className="hover:text-white transition">Accessibility</button>
+    <div className="flex flex-wrap gap-8 p-8 mt-8 border-t border-white/10 text-sm text-zinc-400">
+      <div className="w-full pt-8 flex justify-between text-xs">
+        <div className="flex gap-4">
+          <a href="#" className="hover:text-white">
+            Legal
+          </a>
+          <a href="#" className="hover:text-white">
+            Privacy Center
+          </a>
+          <a href="#" className="hover:text-white">
+            Privacy Policy
+          </a>
+          <a href="#" className="hover:text-white">
+            Cookies
+          </a>
+          <a href="#" className="hover:text-white">
+            About Ads
+          </a>
+          <a href="#" className="hover:text-white">
+            Accessibility
+          </a>
+        </div>
+        <div>&copy; 2024 Fossils Music Stream</div>
+      </div>
     </div>
   );
 };

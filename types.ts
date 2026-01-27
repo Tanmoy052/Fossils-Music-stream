@@ -1,3 +1,4 @@
+
 export interface Album {
   id: string;
   name: string;
@@ -18,7 +19,6 @@ export interface Song {
   albumName: string;
   albumImage: string;
   audioUrl: string;
-  lyricsId?: string;
   duration: string;
   durationSeconds: number;
   trackNumber: number;
@@ -39,7 +39,15 @@ export interface Lyrics {
   lines: TimedLyric[];
 }
 
-export type ViewType = "home" | "album" | "search" | "playlist";
+export interface LyricsItem {
+  id: string;
+  albumName: string;
+  songName: string;
+  bengaliLyrics: string;
+  createdAt: number;
+}
+
+export type ViewType = 'home' | 'album' | 'search' | 'playlist' | 'lyrics';
 
 export interface PlayerContextType {
   currentSong: Song | null;
@@ -48,14 +56,11 @@ export interface PlayerContextType {
   progress: number;
   volume: number;
   queue: Song[];
-  playbackError: string | null;
   playSong: (song: Song, contextSongs?: Song[]) => void;
-  showLyrics: (song: Song) => void;
   togglePlay: () => void;
   playNext: () => void;
   playPrev: () => void;
   seek: (time: number) => void;
   setVolume: (v: number) => void;
   addToQueue: (song: Song) => void;
-  clearPlaybackError: () => void;
 }

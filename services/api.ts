@@ -42,7 +42,9 @@ export const api = {
   },
 
   getSongsByAlbum: async (albumId: string): Promise<Song[]> => {
-    return SONGS.filter((s) => s.albumId === albumId).map((s) => ({
+    const songs = SONGS.filter((s) => s.albumId === albumId);
+    const available = songs.filter((s) => s.audioUrl.startsWith("/audio/"));
+    return available.map((s) => ({
       ...s,
       albumImage: albumImageForSong(s),
     }));
@@ -57,7 +59,9 @@ export const api = {
   },
 
   getSongsByIds: async (ids: string[]): Promise<Song[]> => {
-    return SONGS.filter((s) => ids.includes(s.id)).map((s) => ({
+    const songs = SONGS.filter((s) => ids.includes(s.id));
+    const available = songs.filter((s) => s.audioUrl.startsWith("/audio/"));
+    return available.map((s) => ({
       ...s,
       albumImage: albumImageForSong(s),
     }));
@@ -81,10 +85,12 @@ export const api = {
       return nameMatch || albumNameMatch || albumAliasMatch;
     });
 
-    const filteredSongs = filteredSongsBase.map((s) => ({
-      ...s,
-      albumImage: albumImageForSong(s),
-    }));
+    const filteredSongs = filteredSongsBase
+      .filter((s) => s.audioUrl.startsWith("/audio/"))
+      .map((s) => ({
+        ...s,
+        albumImage: albumImageForSong(s),
+      }));
 
     return { albums: filteredAlbums, songs: filteredSongs };
   },

@@ -5,14 +5,14 @@ import { Player } from "./components/Player";
 import { SearchBar } from "./components/SearchBar";
 import { AlbumCard } from "./components/AlbumCard";
 import { AlbumDetail } from "./components/AlbumDetail";
-import { SyncedLyrics } from "./components/SyncedLyrics";
+import { LyricsManager } from "./components/LyricsManager";
 import { FooterLinks } from "./components/FooterLinks";
 import { HERO_BG_URL } from "./content/hero";
 import { api } from "./services/api";
 import { Album, Song, Playlist, ViewType } from "./types";
 
 function AppContent() {
-  const { currentSong, playSong, currentTime } = usePlayer();
+  const { currentSong, playSong } = usePlayer();
   const [albums, setAlbums] = useState<Album[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [activeView, setActiveView] = useState<ViewType>("home");
@@ -146,12 +146,13 @@ function AppContent() {
                     ))}
                   </div>
                 </div>
+                <FooterLinks />
               </div>
             )}
 
-            {activeView === "album" && (
+            {activeView === "album" && viewData.album && (
               <AlbumDetail
-                album={viewData.album!}
+                album={viewData.album}
                 songs={viewData.songs}
                 onPlaySong={(song) => playSong(song, viewData.songs)}
               />
@@ -182,17 +183,10 @@ function AppContent() {
                 </div>
               </div>
             )}
-            {/* Footer links like Spotify */}
-            <FooterLinks />
+
+            {activeView === "lyrics" && <LyricsManager />}
           </div>
         </main>
-
-        {currentSong && (
-          <SyncedLyrics
-            songId={currentSong.lyricsId ?? currentSong.id}
-            currentTime={currentTime}
-          />
-        )}
       </div>
 
       <Player />

@@ -19,8 +19,8 @@ export const AlbumCard: React.FC<AlbumCardProps> = ({ album, onClick }) => {
           alt={album.name} 
           className="w-full h-full object-cover rounded-md" 
         />
-        <button className="absolute bottom-2 right-2 w-12 h-12 bg-fossils-red rounded-full flex items-center justify-center shadow-lg opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hover:scale-105 active:scale-95">
-          <i className="fa-solid fa-play text-white text-xl ml-1"></i>
+        <button className="absolute bottom-2 right-2 w-12 h-12 bg-spotify-green rounded-full flex items-center justify-center shadow-lg opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hover:scale-105 active:scale-95">
+          <i className="fa-solid fa-play text-black text-xl ml-1"></i>
         </button>
       </div>
       <h3 className="text-white font-bold truncate mb-1">{album.name}</h3>

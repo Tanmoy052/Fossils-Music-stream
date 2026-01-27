@@ -47,6 +47,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <i className="fa-solid fa-magnifying-glass text-xl"></i>
             Search
           </button>
+          <button
+            onClick={() => onNavigate("lyrics")}
+            className={`flex items-center gap-4 w-full text-left font-semibold transition hover:text-white ${activeView === "lyrics" ? "text-white" : "text-zinc-400"}`}
+          >
+            <i className="fa-solid fa-music text-xl"></i>
+            Lyrics
+          </button>
         </nav>
       </div>
 
