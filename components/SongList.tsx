@@ -36,11 +36,11 @@ export const SongList: React.FC<SongListProps> = ({
     : [];
 
   return (
-    <div className="grid grid-cols-12 h-full gap-0">
+    <div className="grid grid-cols-1 md:grid-cols-12 h-full gap-0">
       {/* Songs List */}
-      <div className="col-span-4 border-r border-zinc-800 overflow-y-auto scrollbar-hide">
+      <div className="col-span-1 md:col-span-4 md:border-r border-zinc-800 border-b md:border-b-0 overflow-y-auto scrollbar-hide min-w-0">
         <div className="sticky top-0 bg-zinc-900 border-b border-zinc-800 p-4">
-          <h3 className="font-semibold text-white">{albumName}</h3>
+          <h3 className="font-semibold text-white text-[clamp(1rem,2.5vw,1.1rem)]">{albumName}</h3>
           <p className="text-xs text-zinc-400 mt-1">{songs.length} songs</p>
         </div>
 
@@ -76,7 +76,7 @@ export const SongList: React.FC<SongListProps> = ({
       </div>
 
       {/* Lyrics Items */}
-      <div className="col-span-8 overflow-y-auto">
+      <div className="col-span-1 md:col-span-8 overflow-y-auto min-w-0">
         {selectedSong ? (
           <LyricsItems
             lyrics={songLyrics}

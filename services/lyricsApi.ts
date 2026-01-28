@@ -78,8 +78,8 @@ export const lyricsApi = {
       .getAllLyrics()
       .filter(
         (l) =>
-          fuzzyMatch(l.albumName, query) ||
-          fuzzyMatch(l.songName, query) ||
+          l.albumName.toLowerCase().includes(lowerQuery) ||
+          l.songName.toLowerCase().includes(lowerQuery) ||
           l.bengaliLyrics.toLowerCase().includes(lowerQuery),
       );
   },
