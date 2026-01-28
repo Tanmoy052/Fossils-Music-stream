@@ -1,6 +1,7 @@
-import { LyricsItem } from '../types';
+import { LyricsItem } from "../types";
+import { ALBUMS } from "../constants";
 
-const LYRICS_STORAGE_KEY = 'fossils:lyrics';
+const LYRICS_STORAGE_KEY = "fossils:lyrics";
 
 export const lyricsApi = {
   getAllLyrics: (): LyricsItem[] => {
@@ -15,7 +16,7 @@ export const lyricsApi = {
   addLyrics: (
     albumName: string,
     songName: string,
-    bengaliLyrics: string
+    bengaliLyrics: string,
   ): LyricsItem => {
     const allLyrics = lyricsApi.getAllLyrics();
     const newLyrics: LyricsItem = {
@@ -34,7 +35,7 @@ export const lyricsApi = {
     id: string,
     albumName: string,
     songName: string,
-    bengaliLyrics: string
+    bengaliLyrics: string,
   ): LyricsItem | null => {
     const allLyrics = lyricsApi.getAllLyrics();
     const index = allLyrics.findIndex((l) => l.id === id);
@@ -65,8 +66,10 @@ export const lyricsApi = {
 
   getUniqueAlbums: (): string[] => {
     const allLyrics = lyricsApi.getAllLyrics();
-    const albums = [...new Set(allLyrics.map((l) => l.albumName))];
-    return albums.sort();
+    const fromLyrics = new Set(allLyrics.map((l) => l.albumName));
+    const fromConstants = new Set(ALBUMS.map((a) => a.name));
+    const merged = new Set<string>([...fromLyrics, ...fromConstants]);
+    return Array.from(merged).sort();
   },
 
   searchLyrics: (query: string): LyricsItem[] => {
@@ -75,16 +78,16 @@ export const lyricsApi = {
       .getAllLyrics()
       .filter(
         (l) =>
-          l.albumName.toLowerCase().includes(lowerQuery) ||
-          l.songName.toLowerCase().includes(lowerQuery) ||
-          l.bengaliLyrics.toLowerCase().includes(lowerQuery)
+          fuzzyMatch(l.albumName, query) ||
+          fuzzyMatch(l.songName, query) ||
+          l.bengaliLyrics.toLowerCase().includes(lowerQuery),
       );
   },
 
   downloadPDF: (albumName: string, songName: string, bengaliLyrics: string) => {
     // Create a more robust PDF with better Bengali text support
-    const doc = document.createElement('iframe');
-    doc.style.display = 'none';
+    const doc = document.createElement("iframe");
+    doc.style.display = "none";
     document.body.appendChild(doc);
 
     const docWindow = doc.contentWindow;

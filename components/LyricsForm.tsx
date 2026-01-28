@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { LyricsItem } from '../types';
+import React, { useState, useEffect, useMemo } from "react";
+import { LyricsItem } from "../types";
+import { ALBUMS, SONGS } from "../constants";
 
 interface LyricsFormProps {
   editingLyrics: LyricsItem | null;
@@ -12,9 +13,9 @@ export const LyricsForm: React.FC<LyricsFormProps> = ({
   onSave,
   onCancel,
 }) => {
-  const [albumName, setAlbumName] = useState('');
-  const [songName, setSongName] = useState('');
-  const [bengaliLyrics, setBengaliLyrics] = useState('');
+  const [albumName, setAlbumName] = useState("");
+  const [songName, setSongName] = useState("");
+  const [bengaliLyrics, setBengaliLyrics] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -22,16 +23,21 @@ export const LyricsForm: React.FC<LyricsFormProps> = ({
       setAlbumName(editingLyrics.albumName);
       setSongName(editingLyrics.songName);
       setBengaliLyrics(editingLyrics.bengaliLyrics);
+    } else {
+      if (!albumName) {
+        const defaultAlbum = ALBUMS[0]?.name || "";
+        setAlbumName(defaultAlbum);
+      }
     }
   }, [editingLyrics]);
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
 
-    if (!albumName.trim()) newErrors.albumName = 'Album name is required';
-    if (!songName.trim()) newErrors.songName = 'Song name is required';
+    if (!albumName.trim()) newErrors.albumName = "Album name is required";
+    if (!songName.trim()) newErrors.songName = "Song name is required";
     if (!bengaliLyrics.trim())
-      newErrors.bengaliLyrics = 'Lyrics text is required';
+      newErrors.bengaliLyrics = "Lyrics text is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -51,38 +57,43 @@ export const LyricsForm: React.FC<LyricsFormProps> = ({
     >
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-white mb-1">
-          {editingLyrics ? 'Edit Lyrics' : 'Add New Lyrics'}
+          {editingLyrics ? "Edit Lyrics" : "Add New Lyrics"}
         </h2>
         <p className="text-zinc-400">
           {editingLyrics
-            ? 'Update the lyrics information'
-            : 'Add Bengali lyrics to the collection'}
+            ? "Update the lyrics information"
+            : "Add Bengali lyrics to the collection"}
         </p>
       </div>
 
-      {/* Album Name */}
       <div className="mb-6">
         <label className="block text-sm font-semibold text-white mb-2">
           Album Name
         </label>
-        <input
-          type="text"
+        <select
           value={albumName}
           onChange={(e) => {
             setAlbumName(e.target.value);
-            if (errors.albumName) setErrors({ ...errors, albumName: '' });
+            if (errors.albumName) setErrors({ ...errors, albumName: "" });
           }}
-          placeholder="e.g., Single Album, Nikhoj, Golokdhnadha"
           className={`w-full bg-zinc-800 text-white px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-fossils-red ${
-            errors.albumName ? 'ring-2 ring-red-500' : ''
+            errors.albumName ? "ring-2 ring-red-500" : ""
           }`}
-        />
+        >
+          <option value="" disabled>
+            Select an album
+          </option>
+          {ALBUMS.map((a) => (
+            <option key={a.id} value={a.name}>
+              {a.name}
+            </option>
+          ))}
+        </select>
         {errors.albumName && (
           <p className="text-red-400 text-xs mt-1">{errors.albumName}</p>
         )}
       </div>
 
-      {/* Song Name */}
       <div className="mb-6">
         <label className="block text-sm font-semibold text-white mb-2">
           Song Name
@@ -92,19 +103,24 @@ export const LyricsForm: React.FC<LyricsFormProps> = ({
           value={songName}
           onChange={(e) => {
             setSongName(e.target.value);
-            if (errors.songName) setErrors({ ...errors, songName: '' });
+            if (errors.songName) setErrors({ ...errors, songName: "" });
           }}
-          placeholder="e.g., Bedroom E, Amara Sei Boyese"
+          list="songs-for-album"
+          placeholder="Select or type the song name"
           className={`w-full bg-zinc-800 text-white px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-fossils-red ${
-            errors.songName ? 'ring-2 ring-red-500' : ''
+            errors.songName ? "ring-2 ring-red-500" : ""
           }`}
         />
+        <datalist id="songs-for-album">
+          {SONGS.filter((s) => s.albumName === albumName).map((s) => (
+            <option key={s.id} value={s.name} />
+          ))}
+        </datalist>
         {errors.songName && (
           <p className="text-red-400 text-xs mt-1">{errors.songName}</p>
         )}
       </div>
 
-      {/* Bengali Lyrics */}
       <div className="mb-6 flex-1 flex flex-col">
         <label className="block text-sm font-semibold text-white mb-2">
           Bengali Lyrics
@@ -114,11 +130,11 @@ export const LyricsForm: React.FC<LyricsFormProps> = ({
           onChange={(e) => {
             setBengaliLyrics(e.target.value);
             if (errors.bengaliLyrics)
-              setErrors({ ...errors, bengaliLyrics: '' });
+              setErrors({ ...errors, bengaliLyrics: "" });
           }}
           placeholder="Paste or type the Bengali lyrics here..."
           className={`flex-1 bg-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-fossils-red resize-none ${
-            errors.bengaliLyrics ? 'ring-2 ring-red-500' : ''
+            errors.bengaliLyrics ? "ring-2 ring-red-500" : ""
           }`}
         />
         {errors.bengaliLyrics && (
@@ -144,9 +160,9 @@ export const LyricsForm: React.FC<LyricsFormProps> = ({
           className="flex-1 px-6 py-3 bg-fossils-red hover:bg-red-700 text-white rounded-lg transition font-semibold"
         >
           <i
-            className={`fa-solid ${editingLyrics ? 'fa-save' : 'fa-plus'} mr-2`}
+            className={`fa-solid ${editingLyrics ? "fa-save" : "fa-plus"} mr-2`}
           ></i>
-          {editingLyrics ? 'Save Changes' : 'Add Lyrics'}
+          {editingLyrics ? "Save Changes" : "Add Lyrics"}
         </button>
       </div>
     </form>

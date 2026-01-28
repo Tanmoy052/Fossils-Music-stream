@@ -4,6 +4,7 @@ import { lyricsApi } from "../services/lyricsApi";
 import { AlbumList } from "./AlbumList";
 import { SongList } from "./SongList";
 import { LyricsForm } from "./LyricsForm";
+import { SONGS, ALBUMS } from "../constants";
 
 export const LyricsManager: React.FC = () => {
   const [allLyrics, setAllLyrics] = useState<LyricsItem[]>([]);
@@ -12,6 +13,7 @@ export const LyricsManager: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingLyrics, setEditingLyrics] = useState<LyricsItem | null>(null);
+  // Avoid using Player context to prevent HMR boundary errors; rely on localStorage
 
   useEffect(() => {
     loadLyrics();
@@ -25,8 +27,7 @@ export const LyricsManager: React.FC = () => {
 
   const filteredAlbums = useMemo(() => {
     if (!searchQuery.trim()) return albums;
-    const q = searchQuery.toLowerCase();
-    return albums.filter((a) => a.toLowerCase().includes(q));
+    return albums.filter((a) => lyricsApi.matchesQuery(a, searchQuery));
   }, [albums, searchQuery]);
 
   const albumLyricsMap = useMemo(() => {
@@ -41,6 +42,13 @@ export const LyricsManager: React.FC = () => {
     });
     return map;
   }, [allLyrics, searchQuery]);
+
+  const displayAlbums = useMemo(() => {
+    if (searchQuery.trim()) {
+      return Array.from(albumLyricsMap.keys());
+    }
+    return filteredAlbums;
+  }, [filteredAlbums, searchQuery, albumLyricsMap]);
 
   const handleSave = (
     albumName: string,
@@ -73,8 +81,38 @@ export const LyricsManager: React.FC = () => {
     loadLyrics();
   };
 
+  const lastPlayed = useMemo(() => {
+    try {
+      const lastId = localStorage.getItem("fossils:lastPlayedSong");
+      if (!lastId) return null;
+      const s = SONGS.find((x) => x.id === lastId);
+      return s || null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const lastPlayedAlbum = useMemo(() => {
+    if (!lastPlayed) return null;
+    return (
+      ALBUMS.find(
+        (a) => a.id === lastPlayed.albumId || a.name === lastPlayed.albumName,
+      ) || null
+    );
+  }, [lastPlayed]);
+
+  const lastPlayedHasLyrics = useMemo(() => {
+    if (!lastPlayed) return false;
+    const items = lyricsApi.getAllLyrics();
+    return items.some(
+      (l) =>
+        l.albumName.toLowerCase() === lastPlayed.albumName.toLowerCase() &&
+        l.songName.toLowerCase() === lastPlayed.name.toLowerCase(),
+    );
+  }, [lastPlayed, allLyrics]);
+
   return (
-    <div className="flex h-full bg-black text-white">
+    <div className="flex bg-black text-white w-full min-h-[400px]">
       <div className="w-64 bg-zinc-950 border-r border-zinc-800 flex flex-col">
         <div className="p-4 border-b border-zinc-800">
           <h2 className="text-lg font-bold flex items-center gap-2">
@@ -99,24 +137,68 @@ export const LyricsManager: React.FC = () => {
             }
           />
         </div>
-        <div className="p-4 border-t border-zinc-800">
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        <div className="border-b border-zinc-800 p-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-black">Lyrics Library</h2>
+            <p className="text-xs text-zinc-400 mt-1">
+              Browse albums and song-wise lyrics. Use search to filter.
+            </p>
+          </div>
           <button
             onClick={() => {
               setEditingLyrics(null);
               setShowForm(true);
             }}
-            className="w-full bg-fossils-red text-white py-2 rounded-lg hover:bg-red-700 transition font-semibold text-sm"
+            className="px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition font-semibold text-sm"
           >
-            <i className="fa-solid fa-plus mr-2"></i>
             Add Lyrics
           </button>
         </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto">
+        {lastPlayed && lastPlayedAlbum && (
+          <div className="p-6 border-b border-zinc-800 bg-zinc-900/30">
+            <div className="flex items-center gap-4">
+              <img
+                src={lastPlayedAlbum.image}
+                className="w-16 h-16 rounded-md shadow"
+              />
+              <div className="flex-1">
+                <p className="text-xs text-zinc-400 uppercase tracking-wider">
+                  Last Played
+                </p>
+                <p className="text-lg font-bold">{lastPlayed.name}</p>
+                <p className="text-xs text-zinc-500">{lastPlayed.albumName}</p>
+              </div>
+              <div className="flex gap-2">
+                {lastPlayedHasLyrics ? (
+                  <button
+                    onClick={() => {
+                      setSelectedAlbum(lastPlayed.albumName);
+                    }}
+                    className="px-3 py-2 bg-fossils-red text-white rounded-lg text-sm hover:bg-red-700 transition"
+                  >
+                    View Lyrics
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setEditingLyrics(null);
+                      setShowForm(true);
+                    }}
+                    className="px-3 py-2 bg-zinc-800 text-white rounded-lg text-sm hover:bg-zinc-700 transition"
+                  >
+                    Add Lyrics
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         {!selectedAlbum ? (
           <div className="p-6 space-y-10">
-            {filteredAlbums.length === 0 ? (
+            {displayAlbums.length === 0 ? (
               <div className="h-full flex items-center justify-center text-zinc-500 p-8">
                 <div className="text-center">
                   <i className="fa-solid fa-music text-4xl mb-4 block"></i>
@@ -124,7 +206,7 @@ export const LyricsManager: React.FC = () => {
                 </div>
               </div>
             ) : (
-              filteredAlbums.map((album) => {
+              displayAlbums.map((album) => {
                 const items = albumLyricsMap.get(album) || [];
                 if (items.length === 0) return null;
                 return (
@@ -136,7 +218,8 @@ export const LyricsManager: React.FC = () => {
                         {items.length === 1 ? "entry" : "entries"}
                       </p>
                     </div>
-                    <LyricsItems
+                    <SongList
+                      albumName={album}
                       lyrics={items}
                       onEdit={handleEdit}
                       onDelete={handleDelete}
@@ -152,6 +235,7 @@ export const LyricsManager: React.FC = () => {
             lyrics={albumLyricsMap.get(selectedAlbum) || []}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            initialSelectedSong={lastPlayed?.name || null}
           />
         )}
       </div>

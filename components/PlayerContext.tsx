@@ -34,6 +34,9 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({
       setContextSongs(songs);
       setIsPlaying(true);
       audioRef.current.src = song.audioUrl;
+      try {
+        localStorage.setItem("fossils:lastPlayedSong", song.id);
+      } catch {}
       audioRef.current.play().catch(console.error);
     },
     [currentSong],
