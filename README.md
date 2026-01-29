@@ -4,9 +4,9 @@ A full‑stack music streaming web application inspired by the legendary Bengali
 
 This project includes:
 
-- **Frontend**: React + Vite + Tailwind CSS
-- **Backend**: Node.js + Express
-- **Database**: MongoDB
+* **Frontend**: React + Vite + Tailwind CSS
+* **Backend**: Node.js + Express
+* **Database**: MongoDB
 
 ---
 
