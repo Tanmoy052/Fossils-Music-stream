@@ -119,7 +119,6 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 201, newItem);
   }
 
-  // ---- Update / Delete Lyrics ----
   const match = pathname.match(/^\/api\/lyrics\/(.+)$/);
   if (match) {
     const id = decodeURIComponent(match[1]);
