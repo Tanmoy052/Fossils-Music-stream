@@ -107,7 +107,7 @@ node server.js
 Backend will run at:
 
 ```
-http://localhost:5000
+http://localhost:4000
 ```
 
 ---
@@ -143,7 +143,7 @@ src/services/api.ts
 Set the base URL to:
 
 ```ts
-http://localhost:5000/api
+http://localhost:4000/api
 ```
 
 ### 4️⃣ Run frontend
