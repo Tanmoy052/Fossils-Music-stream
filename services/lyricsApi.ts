@@ -2,6 +2,20 @@ import { LyricsItem } from "../types";
 import { ALBUMS } from "../constants";
 
 const LYRICS_STORAGE_KEY = "fossils:lyrics";
+const API_BASE =
+  (typeof import.meta !== "undefined" &&
+    (import.meta as any).env?.VITE_LYRICS_API_URL) ||
+  "http://localhost:4000/api";
+
+const safeFetch = async (input: RequestInfo, init?: RequestInit) => {
+  try {
+    const res = await fetch(input, init);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch {
+    return null;
+  }
+};
 
 export const lyricsApi = {
   getAllLyrics: (): LyricsItem[] => {
@@ -11,6 +25,15 @@ export const lyricsApi = {
     } catch {
       return [];
     }
+  },
+
+  syncFromServer: async (): Promise<LyricsItem[]> => {
+    const serverData = await safeFetch(`${API_BASE}/lyrics`);
+    if (Array.isArray(serverData)) {
+      localStorage.setItem(LYRICS_STORAGE_KEY, JSON.stringify(serverData));
+      return serverData;
+    }
+    return lyricsApi.getAllLyrics();
   },
 
   addLyrics: (
@@ -28,6 +51,15 @@ export const lyricsApi = {
     };
     allLyrics.push(newLyrics);
     localStorage.setItem(LYRICS_STORAGE_KEY, JSON.stringify(allLyrics));
+    safeFetch(`${API_BASE}/lyrics`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        albumName,
+        songName,
+        bengaliLyrics,
+      }),
+    });
     return newLyrics;
   },
 
@@ -48,6 +80,11 @@ export const lyricsApi = {
       bengaliLyrics,
     };
     localStorage.setItem(LYRICS_STORAGE_KEY, JSON.stringify(allLyrics));
+    safeFetch(`${API_BASE}/lyrics/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ albumName, songName, bengaliLyrics }),
+    });
     return allLyrics[index];
   },
 
@@ -55,6 +92,9 @@ export const lyricsApi = {
     const allLyrics = lyricsApi.getAllLyrics();
     const filtered = allLyrics.filter((l) => l.id !== id);
     localStorage.setItem(LYRICS_STORAGE_KEY, JSON.stringify(filtered));
+    safeFetch(`${API_BASE}/lyrics/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
     return filtered.length < allLyrics.length;
   },
 
