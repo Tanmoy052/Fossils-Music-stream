@@ -94,7 +94,11 @@ async function connectMongo() {
     return;
   }
   try {
-    await mongoose.connect(MONGO_URI);
+    const options = {
+      serverSelectionTimeoutMS: 6000,
+      dbName: undefined,
+    };
+    await mongoose.connect(MONGO_URI, options);
     dbReady = true;
     LyricsModel = mongoose.model("Lyrics", LyricsSchema);
     console.log("✅ MongoDB Connected");
