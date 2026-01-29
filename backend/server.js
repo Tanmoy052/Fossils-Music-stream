@@ -7,6 +7,7 @@ const url = require("url");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config({ path: path.join(__dirname, ".env") });
+console.log("MONGO_URI =", process.env.MONGO_URI);
 
 // ================== CONFIG ==================
 const PORT = process.env.PORT || 4000;
