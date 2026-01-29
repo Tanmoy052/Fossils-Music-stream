@@ -4,11 +4,15 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const url = require("url");
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 // ================== CONFIG ==================
 const PORT = process.env.PORT || 4000;
 const DATA_DIR = path.join(__dirname, "data");
 const LYRICS_FILE = path.join(DATA_DIR, "lyrics.json");
+const MONGO_URI = process.env.MONGO_URI || "";
 
 // ================== FILE HELPERS ==================
 function ensureDataFile() {
@@ -72,6 +76,36 @@ function parseBody(req) {
 ensureDataFile();
 
 // ================== SERVER ==================
+// Optional MongoDB connection and model
+let dbReady = false;
+let LyricsModel = null;
+const LyricsSchema = new mongoose.Schema(
+  {
+    albumName: { type: String, required: true },
+    songName: { type: String, required: true },
+    bengaliLyrics: { type: String, required: true },
+    createdAt: { type: Number, default: () => Date.now() },
+  },
+  { collection: "lyrics" },
+);
+async function connectMongo() {
+  if (!MONGO_URI) {
+    console.log("MongoDB URI not set. Using file-based storage.");
+    return;
+  }
+  try {
+    await mongoose.connect(MONGO_URI);
+    dbReady = true;
+    LyricsModel = mongoose.model("Lyrics", LyricsSchema);
+    console.log("✅ MongoDB Connected");
+  } catch (err) {
+    dbReady = false;
+    console.error("❌ MongoDB connection error:", err?.message || err);
+    console.log("Falling back to file-based storage.");
+  }
+}
+connectMongo();
+
 const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname || "";
@@ -88,11 +122,15 @@ const server = http.createServer(async (req, res) => {
 
   // ---- Health Check ----
   if (pathname === "/api/health" && req.method === "GET") {
-    return sendJson(res, 200, { ok: true });
+    return sendJson(res, 200, { ok: true, db: dbReady });
   }
 
   // ---- Get Lyrics ----
   if (pathname === "/api/lyrics" && req.method === "GET") {
+    if (dbReady && LyricsModel) {
+      const list = await LyricsModel.find().sort({ createdAt: 1 }).lean();
+      return sendJson(res, 200, list);
+    }
     return sendJson(res, 200, readLyrics());
   }
 
@@ -105,6 +143,14 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 400, { error: "Missing fields" });
     }
 
+    if (dbReady && LyricsModel) {
+      const saved = await LyricsModel.create({
+        albumName,
+        songName,
+        bengaliLyrics,
+      });
+      return sendJson(res, 201, saved);
+    }
     const list = readLyrics();
     const newItem = {
       id: `lyrics_${Date.now()}`,
@@ -113,7 +159,6 @@ const server = http.createServer(async (req, res) => {
       bengaliLyrics,
       createdAt: Date.now(),
     };
-
     list.push(newItem);
     writeLyrics(list);
     return sendJson(res, 201, newItem);
@@ -122,21 +167,37 @@ const server = http.createServer(async (req, res) => {
   const match = pathname.match(/^\/api\/lyrics\/(.+)$/);
   if (match) {
     const id = decodeURIComponent(match[1]);
-    const list = readLyrics();
-    const index = list.findIndex((l) => l.id === id);
-
-    if (index === -1) {
-      return sendJson(res, 404, { error: "Not found" });
-    }
-
     if (req.method === "PUT") {
       const body = await parseBody(req);
+      if (dbReady && LyricsModel) {
+        const updated = await LyricsModel.findByIdAndUpdate(id, body, {
+          new: true,
+        });
+        if (!updated) {
+          return sendJson(res, 404, { error: "Not found" });
+        }
+        return sendJson(res, 200, updated);
+      }
+      const list = readLyrics();
+      const index = list.findIndex((l) => l.id === id);
+      if (index === -1) {
+        return sendJson(res, 404, { error: "Not found" });
+      }
       list[index] = { ...list[index], ...body };
       writeLyrics(list);
       return sendJson(res, 200, list[index]);
     }
 
     if (req.method === "DELETE") {
+      if (dbReady && LyricsModel) {
+        const del = await LyricsModel.findByIdAndDelete(id);
+        return sendJson(res, 200, { ok: !!del });
+      }
+      const list = readLyrics();
+      const index = list.findIndex((l) => l.id === id);
+      if (index === -1) {
+        return sendJson(res, 404, { error: "Not found" });
+      }
       list.splice(index, 1);
       writeLyrics(list);
       return sendJson(res, 200, { ok: true });
