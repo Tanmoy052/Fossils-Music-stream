@@ -48,25 +48,31 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
   useEffect(() => {
     if (!selectedLyricsForView) return;
     const charCount = selectedLyricsForView.bengaliLyrics.length;
-    let baseFont = 38;
-    let baseLine = 2.1;
-    let basePad = 56;
+    let baseFont = 32;
+    let baseLine = 2.0;
+    let basePad = 52;
     if (charCount < 500) {
-      baseFont = 44;
-      baseLine = 2.3;
-      basePad = 64;
-    } else if (charCount < 1500) {
-      baseFont = 38;
+      baseFont = 36;
       baseLine = 2.1;
-      basePad = 56;
-    } else if (charCount < 3000) {
+      basePad = 58;
+    } else if (charCount < 1500) {
       baseFont = 32;
-      baseLine = 1.9;
-      basePad = 48;
-    } else {
+      baseLine = 2.0;
+      basePad = 52;
+    } else if (charCount < 3000) {
       baseFont = 28;
-      baseLine = 1.7;
-      basePad = 40;
+      baseLine = 1.8;
+      basePad = 46;
+    } else {
+      baseFont = 24;
+      baseLine = 1.6;
+      basePad = 38;
+    }
+    const isSmallScreen = window.innerWidth < 640;
+    if (isSmallScreen) {
+      baseFont = Math.max(18, Math.round(baseFont * 0.9));
+      baseLine = Math.max(1.45, baseLine * 0.95);
+      basePad = Math.max(28, Math.round(basePad * 0.9));
     }
     setFontSize(baseFont);
     setLineHeight(baseLine);

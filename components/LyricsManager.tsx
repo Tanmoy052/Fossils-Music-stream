@@ -27,9 +27,7 @@ export const LyricsManager: React.FC = () => {
 
   const filteredAlbums = useMemo(() => {
     if (!searchQuery.trim()) return albums;
-    return albums.filter((a) =>
-      a.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
+    return albums.filter((a) => a.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [albums, searchQuery]);
 
   const albumLyricsMap = useMemo(() => {
@@ -136,9 +134,7 @@ export const LyricsManager: React.FC = () => {
       <div className="flex-1 overflow-y-auto min-w-0">
         <div className="border-b border-zinc-800 p-6 flex items-center justify-between">
           <div>
-            <h2 className="text-[clamp(1.25rem,3vw,2rem)] font-black">
-              Lyrics Library
-            </h2>
+            <h2 className="text-[clamp(1.25rem,3vw,2rem)] font-black">Lyrics Library</h2>
             <p className="text-xs text-zinc-400 mt-1">
               Browse albums and song-wise lyrics. Use search to filter.
             </p>
@@ -164,9 +160,7 @@ export const LyricsManager: React.FC = () => {
                 <p className="text-xs text-zinc-400 uppercase tracking-wider">
                   Last Played
                 </p>
-                <p className="text-[clamp(0.95rem,2.5vw,1.125rem)] font-bold">
-                  {lastPlayed.name}
-                </p>
+              <p className="text-[clamp(0.95rem,2.5vw,1.125rem)] font-bold">{lastPlayed.name}</p>
                 <p className="text-xs text-zinc-500">{lastPlayed.albumName}</p>
               </div>
               <div className="flex gap-2">
@@ -210,9 +204,7 @@ export const LyricsManager: React.FC = () => {
                 return (
                   <div key={album} className="space-y-4">
                     <div className="px-2">
-                      <h3 className="text-[clamp(1.25rem,3vw,2rem)] font-black">
-                        {album}
-                      </h3>
+                      <h3 className="text-[clamp(1.25rem,3vw,2rem)] font-black">{album}</h3>
                       <p className="text-xs text-zinc-400 mt-1">
                         {items.length}{" "}
                         {items.length === 1 ? "entry" : "entries"}
