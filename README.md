@@ -4,19 +4,19 @@ A full‑stack music streaming web application inspired by the legendary Bengali
 
 This project includes:
 
-* **Frontend**: React + Vite + Tailwind CSS
-* **Backend**: Node.js + Express
-* **Database**: MongoDB
+- **Frontend**: React + Vite + Tailwind CSS
+- **Backend**: Node.js + Express
+- **Database**: MongoDB
 
 ---
 
 ## ✨ Features
 
-* 🎧 Music browsing & playback UI
-* 📀 Discography and albums
-* 📝 Lyrics display
-* 🎨 Custom Tailwind-based theme
-* 🔌 REST API backend
+- 🎧 Music browsing & playback UI
+- 📀 Discography and albums
+- 📝 Lyrics display
+- 🎨 Custom Tailwind-based theme
+- 🔌 REST API backend
 
 ---
 
@@ -24,15 +24,15 @@ This project includes:
 
 ### Frontend
 
-* React (with Vite)
-* Tailwind CSS
-* Lucide Icons
+- React (with Vite)
+- Tailwind CSS
+- Lucide Icons
 
 ### Backend
 
-* Node.js
-* Express.js
-* MongoDB (Mongoose)
+- Node.js
+- Express.js
+- MongoDB (Mongoose)
 
 ---
 
@@ -40,9 +40,9 @@ This project includes:
 
 Make sure you have the following installed:
 
-* **Node.js** v16 or later
-* **MongoDB** (local or Atlas)
-* **Git**
+- **Node.js** v16 or later
+- **MongoDB** (local or Atlas)
+- **Git**
 
 ---
 
@@ -170,8 +170,8 @@ constants.tsx
 
 You can:
 
-* Manually insert it using **MongoDB Compass**
-* OR create a seed/migration script
+- Manually insert it using **MongoDB Compass**
+- OR create a seed/migration script
 
 ---
 
@@ -179,15 +179,15 @@ You can:
 
 ### Frontend
 
-* **Vercel** (recommended)
+- **Vercel** (recommended)
 
 ### Backend
 
-* **Render**, **Railway**, or **Cyclic**
+- **Render**, **Railway**, or **Cyclic**
 
 ### Database
 
-* **MongoDB Atlas**
+- **MongoDB Atlas**
 
 ---
 
@@ -217,11 +217,11 @@ This project is for **educational and fan‑based purposes only**.
 
 ## 🙌 Acknowledgements
 
-* Fossils (band)
-* React
-* Tailwind CSS
-* MongoDB
+- Fossils (band)
+- React
+- Tailwind CSS
+- MongoDB
 
 ---
 
-🎶 *Keep rocking!*
+🎶 _Keep rocking!_
