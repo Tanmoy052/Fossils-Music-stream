@@ -6,7 +6,7 @@ const path = require("path");
 const url = require("url");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-dotenv.config({ path: path.join(__dirname, ".env") });
+dotenv.config();
 console.log("MONGO_URI =", process.env.MONGO_URI);
 
 // ================== CONFIG ==================
@@ -95,17 +95,15 @@ async function connectMongo() {
     return;
   }
   try {
-    const options = {
+    await mongoose.connect(MONGO_URI, {
       serverSelectionTimeoutMS: 6000,
-      dbName: undefined,
-    };
-    await mongoose.connect(MONGO_URI, options);
+    });
     dbReady = true;
     LyricsModel = mongoose.model("Lyrics", LyricsSchema);
     console.log("✅ MongoDB Connected");
   } catch (err) {
     dbReady = false;
-    console.error("❌ MongoDB connection error:", err?.message || err);
+    console.error("❌ MongoDB connection error:", err.message);
     console.log("Falling back to file-based storage.");
   }
 }
