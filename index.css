@@ -1,4 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 body {
   font-family: "Inter", sans-serif;
@@ -6,6 +10,10 @@ body {
   color: #fff;
   margin: 0;
   overflow: hidden;
+}
+
+.font-bengali {
+  font-family: "Noto Sans Bengali", "SolaimanLipi", "Bangla", sans-serif;
 }
 
 ::-webkit-scrollbar {
@@ -22,6 +30,29 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.custom-scrollbar {
+  -ms-overflow-style: auto;
+  scrollbar-width: thin;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
 
