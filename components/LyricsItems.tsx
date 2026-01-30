@@ -1,5 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LyricsItem } from '../types';
+type LyricsItem = {
+  id: string;
+  albumName: string;
+  songName: string;
+  bengaliLyrics: string;
+  createdAt: string;
+};
 import { lyricsApi } from '../services/lyricsApi';
 
 interface LyricsItemsProps {

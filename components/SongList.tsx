@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { LyricsItem } from '../types';
+type LyricsItem = {
+  id: string;
+  songName: string;
+  timestamp: string;
+  text: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
 import { LyricsItems } from './LyricsItems';
 
 interface SongListProps {

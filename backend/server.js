@@ -10,7 +10,7 @@ dotenv.config();
 console.log("MONGO_URI =", process.env.MONGO_URI);
 
 // ================== CONFIG ==================
-const PORT = process.env.PORT || 4001;
+const PORT = process.env.PORT || 4000;
 const DATA_DIR = path.join(__dirname, "data");
 const LYRICS_FILE = path.join(DATA_DIR, "lyrics.json");
 const MONGO_URI = process.env.MONGO_URI || "";
