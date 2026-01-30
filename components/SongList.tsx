@@ -1,13 +1,12 @@
-import React, { useState } from "react";
-import { LyricsItem } from "../types";
-import { LyricsItems } from "./LyricsItems";
+import React, { useState } from 'react';
+import { LyricsItem } from '../types';
+import { LyricsItems } from './LyricsItems';
 
 interface SongListProps {
   albumName: string;
   lyrics: LyricsItem[];
   onEdit: (lyrics: LyricsItem) => void;
   onDelete: (id: string) => void;
-  initialSelectedSong?: string | null;
 }
 
 export const SongList: React.FC<SongListProps> = ({
@@ -15,20 +14,11 @@ export const SongList: React.FC<SongListProps> = ({
   lyrics,
   onEdit,
   onDelete,
-  initialSelectedSong = null,
 }) => {
-  const [selectedSong, setSelectedSong] = useState<string | null>(
-    initialSelectedSong,
-  );
-
-  React.useEffect(() => {
-    if (initialSelectedSong) {
-      setSelectedSong(initialSelectedSong);
-    }
-  }, [initialSelectedSong]);
+  const [selectedSong, setSelectedSong] = useState<string | null>(null);
 
   const songs = Array.from(
-    new Map(lyrics.map((item) => [item.songName, item])).keys(),
+    new Map(lyrics.map((item) => [item.songName, item])).keys()
   );
 
   const songLyrics = selectedSong
@@ -36,11 +26,11 @@ export const SongList: React.FC<SongListProps> = ({
     : [];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 h-full gap-0">
+    <div className="grid grid-cols-12 h-full gap-0">
       {/* Songs List */}
-      <div className="col-span-1 md:col-span-4 md:border-r border-zinc-800 border-b md:border-b-0 overflow-y-auto scrollbar-hide min-w-0">
+      <div className="col-span-4 border-r border-zinc-800 overflow-y-auto scrollbar-hide">
         <div className="sticky top-0 bg-zinc-900 border-b border-zinc-800 p-4">
-          <h3 className="font-semibold text-white text-[clamp(1rem,2.5vw,1.1rem)]">{albumName}</h3>
+          <h3 className="font-semibold text-white">{albumName}</h3>
           <p className="text-xs text-zinc-400 mt-1">{songs.length} songs</p>
         </div>
 
@@ -52,7 +42,7 @@ export const SongList: React.FC<SongListProps> = ({
           <div className="space-y-1 p-4">
             {songs.map((song) => {
               const songCount = lyrics.filter(
-                (item) => item.songName === song,
+                (item) => item.songName === song
               ).length;
               return (
                 <button
@@ -60,13 +50,13 @@ export const SongList: React.FC<SongListProps> = ({
                   onClick={() => setSelectedSong(song)}
                   className={`w-full text-left px-3 py-2 rounded-lg transition ${
                     selectedSong === song
-                      ? "bg-fossils-red text-white"
-                      : "text-zinc-300 hover:bg-zinc-800"
+                      ? 'bg-fossils-red text-white'
+                      : 'text-zinc-300 hover:bg-zinc-800'
                   }`}
                 >
                   <p className="font-semibold truncate text-sm">{song}</p>
                   <p className="text-xs text-zinc-400">
-                    {songCount} {songCount === 1 ? "entry" : "entries"}
+                    {songCount} {songCount === 1 ? 'entry' : 'entries'}
                   </p>
                 </button>
               );
@@ -76,7 +66,7 @@ export const SongList: React.FC<SongListProps> = ({
       </div>
 
       {/* Lyrics Items */}
-      <div className="col-span-1 md:col-span-8 overflow-y-auto min-w-0">
+      <div className="col-span-8 overflow-y-auto scrollbar-hide">
         {selectedSong ? (
           <LyricsItems
             lyrics={songLyrics}
@@ -84,7 +74,9 @@ export const SongList: React.FC<SongListProps> = ({
             onDelete={onDelete}
           />
         ) : (
-          <LyricsItems lyrics={lyrics} onEdit={onEdit} onDelete={onDelete} />
+          <div className="flex items-center justify-center h-full text-zinc-500">
+            <p>Select a song to view its lyrics</p>
+          </div>
         )}
       </div>
     </div>

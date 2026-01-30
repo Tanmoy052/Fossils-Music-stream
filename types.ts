@@ -39,15 +39,7 @@ export interface Lyrics {
   lines: TimedLyric[];
 }
 
-export interface LyricsItem {
-  id: string;
-  albumName: string;
-  songName: string;
-  bengaliLyrics: string;
-  createdAt: number;
-}
-
-export type ViewType = 'home' | 'album' | 'search' | 'playlist' | 'lyrics';
+export type ViewType = 'home' | 'album' | 'search' | 'playlist';
 
 export interface PlayerContextType {
   currentSong: Song | null;

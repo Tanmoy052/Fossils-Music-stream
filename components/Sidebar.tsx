@@ -29,7 +29,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       className={`fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out
       ${isDrawerOpen ? "translate-x-0" : "-translate-x-full"} 
       sm:translate-x-0 sm:static sm:z-auto 
-      ${isCollapsed ? "w-16" : "w-64"} flex flex-col h-full border-r border-zinc-800 shrink-0 bg-gradient-to-b from-fossils-red/15 via-black to-black`}
+      ${isCollapsed ? "w-16" : "w-64"} flex flex-col h-full border-r border-zinc-800 shrink-0 bg-zinc-950`}
     >
       <div className="p-6 pb-0 relative">
         <button
@@ -71,7 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               onNavigate("home");
               closeDrawer && closeDrawer(false);
             }}
-            className={`flex items-center gap-4 w-full text-left font-semibold transition hover:text-white ${activeView === "home" ? "text-white" : "text-zinc-400"}`}
+            className={`flex items-center gap-4 w-full text-left font-semibold transition hover:text-white ${activeView === "home" ? "text-white" : "text-zinc-300"}`}
           >
             <i className="fa-solid fa-house text-xl"></i>
             {!isCollapsed && "Home"}
@@ -81,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               onNavigate("search");
               closeDrawer && closeDrawer(false);
             }}
-            className={`flex items-center gap-4 w-full text-left font-semibold transition hover:text-white ${activeView === "search" ? "text-white" : "text-zinc-400"}`}
+            className={`flex items-center gap-4 w-full text-left font-semibold transition hover:text-white ${activeView === "search" ? "text-white" : "text-zinc-300"}`}
           >
             <i className="fa-solid fa-magnifying-glass text-xl"></i>
             {!isCollapsed && "Search"}
@@ -91,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               onNavigate("lyrics");
               closeDrawer && closeDrawer(false);
             }}
-            className={`flex items-center gap-4 w-full text-left font-semibold transition hover:text-white ${activeView === "lyrics" ? "text-white" : "text-zinc-400"}`}
+            className={`flex items-center gap-4 w-full text-left font-semibold transition hover:text-white ${activeView === "lyrics" ? "text-white" : "text-zinc-300"}`}
           >
             <i className="fa-solid fa-music text-xl"></i>
             {!isCollapsed && "Lyrics"}
@@ -101,7 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       <div className="flex-1 overflow-y-auto px-6 space-y-8 pb-40">
         <div>
-          <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <div className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-4 flex items-center gap-2">
             <i className="fa-solid fa-layer-group"></i>
             {!isCollapsed && "Your Playlists"}
           </div>
@@ -113,7 +113,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onNavigate("playlist", pl.id);
                   closeDrawer && closeDrawer(false);
                 }}
-                className={`block w-full text-left text-sm font-medium transition-colors hover:text-white truncate py-1 ${selectedId === pl.id ? "text-spotify-green" : "text-zinc-400"}`}
+                className={`block w-full text-left text-sm font-medium transition-colors hover:text-white truncate py-1 ${selectedId === pl.id ? "text-spotify-green" : "text-zinc-300"}`}
               >
                 {!isCollapsed && pl.name}
               </button>
@@ -122,7 +122,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         <div>
-          <div className="text-sm font-bold text-zinc-300 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <div className="text-sm font-bold text-zinc-200 uppercase tracking-widest mb-4 flex items-center gap-2">
             <i className="fa-solid fa-record-vinyl"></i>
             {!isCollapsed && "ALL ALBUMS"}
           </div>
@@ -134,7 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onNavigate("album", album.id);
                   closeDrawer && closeDrawer(false);
                 }}
-                className={`block w-full text-left text-sm font-medium transition-colors hover:text-white truncate py-1 ${selectedId === album.id ? "text-spotify-green" : "text-zinc-400"}`}
+                className={`block w-full text-left text-sm font-medium transition-colors hover:text-white truncate py-1 ${selectedId === album.id ? "text-spotify-green" : "text-zinc-300"}`}
               >
                 {!isCollapsed && album.name}
               </button>
