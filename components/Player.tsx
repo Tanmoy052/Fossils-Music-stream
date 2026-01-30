@@ -34,6 +34,7 @@ export const Player: React.FC = () => {
         <img
           src={currentSong.albumImage}
           className="w-14 h-14 rounded shadow-2xl"
+          alt={currentSong.name}
         />
         <div className="min-w-0">
           <div className="text-sm font-bold truncate hover:underline cursor-pointer">
@@ -58,7 +59,7 @@ export const Player: React.FC = () => {
             className="w-10 h-10 bg-white rounded-full text-black flex items-center justify-center hover:scale-105 transition"
           >
             <i
-              className={`fa-solid ${isPlaying ? "fa-pause" : "fa-play"} ${!isPlaying && "ml-1"}`}
+              className={`fa-solid ${isPlaying ? "fa-pause" : "fa-play"} ${!isPlaying ? "ml-1" : ""}`}
             ></i>
           </button>
           <button
@@ -77,7 +78,7 @@ export const Player: React.FC = () => {
             min="0"
             max="100"
             step="0.1"
-            value={progress}
+            value={isNaN(progress) ? 0 : progress}
             onChange={(e) =>
               seek(
                 (parseFloat(e.target.value) / 100) *

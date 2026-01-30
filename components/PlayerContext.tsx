@@ -24,33 +24,58 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const audioRef = useRef<HTMLAudioElement>(new Audio());
 
+  const togglePlay = useCallback(() => {
+    if (!currentSong) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+          })
+          .catch((error) => {
+            if (error.name !== "AbortError") {
+              console.error("Playback error:", error);
+            }
+          });
+      }
+    }
+  }, [isPlaying, currentSong]);
+
   const playSong = useCallback(
     (song: Song, songs: Song[] = []) => {
       if (currentSong?.id === song.id) {
         togglePlay();
         return;
       }
+
+      // Pause current audio before switching source
+      audioRef.current.pause();
+
       setCurrentSong(song);
       setContextSongs(songs);
       setIsPlaying(true);
       audioRef.current.src = song.audioUrl;
+      audioRef.current.load(); // Explicitly load the new source
+
       try {
         localStorage.setItem("fossils:lastPlayedSong", song.id);
       } catch {}
-      audioRef.current.play().catch(console.error);
-    },
-    [currentSong],
-  );
 
-  const togglePlay = useCallback(() => {
-    if (!currentSong) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch(console.error);
-    }
-    setIsPlaying(!isPlaying);
-  }, [isPlaying, currentSong]);
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          if (error.name !== "AbortError") {
+            console.error("Playback error:", error);
+          }
+        });
+      }
+    },
+    [currentSong, togglePlay],
+  );
 
   const playNext = useCallback(() => {
     const list = contextSongs.length > 0 ? contextSongs : queue;
