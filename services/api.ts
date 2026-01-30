@@ -11,20 +11,20 @@ const albumImageForSong = (song: Song): string => {
 
 const normalize = (value: string) => value.toLowerCase().replace(/\s+/g, "");
 
-const matchesAlbumQuery = (albumName: string, query: string) => {
+const matchesQuery = (target: string, query: string) => {
   const q = normalize(query);
   if (!q) return false;
 
-  const nameNorm = normalize(albumName);
-  if (nameNorm.includes(q) || q.includes(nameNorm)) return true;
+  const targetNorm = normalize(target);
+  if (targetNorm.includes(q) || q.includes(targetNorm)) return true;
 
-  const digitsMatch = nameNorm.match(/\d+/);
+  const digitsMatch = targetNorm.match(/\d+/);
   if (digitsMatch) {
     const digits = digitsMatch[0];
-    const lettersInName = nameNorm.replace(/\d+/g, "");
+    const lettersInTarget = targetNorm.replace(/\d+/g, "");
     const lettersInQuery = q.replace(/\d+/g, "");
 
-    if (q.includes(digits) && lettersInName.startsWith(lettersInQuery)) {
+    if (q.includes(digits) && (lettersInTarget.includes(lettersInQuery) || lettersInQuery.includes(lettersInTarget))) {
       return true;
     }
   }
@@ -74,15 +74,18 @@ export const api = {
 
     const filteredAlbums = ALBUMS.filter((a) => {
       return (
-        a.name.toLowerCase().includes(q) || matchesAlbumQuery(a.name, query)
+        a.name.toLowerCase().includes(q) || 
+        matchesQuery(a.name, query) ||
+        (a.description && a.description.toLowerCase().includes(q))
       );
     });
 
     const filteredSongsBase = SONGS.filter((s) => {
-      const nameMatch = s.name.toLowerCase().includes(q);
-      const albumNameMatch = s.albumName.toLowerCase().includes(q);
-      const albumAliasMatch = matchesAlbumQuery(s.albumName, query);
-      return nameMatch || albumNameMatch || albumAliasMatch;
+      const nameMatch = s.name.toLowerCase().includes(q) || matchesQuery(s.name, query);
+      const albumNameMatch = s.albumName.toLowerCase().includes(q) || matchesQuery(s.albumName, query);
+      const artistMatch = s.artist && (s.artist.toLowerCase().includes(q) || matchesQuery(s.artist, query));
+      
+      return nameMatch || albumNameMatch || artistMatch;
     });
 
     const filteredSongs = filteredSongsBase
