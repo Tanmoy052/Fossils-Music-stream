@@ -7,6 +7,10 @@ const url = require("url");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config();
+const dns = require("dns");
+if (process.env.DNS_SERVER) {
+  dns.setServers([process.env.DNS_SERVER]);
+}
 console.log("MONGO_URI =", process.env.MONGO_URI);
 
 // ================== CONFIG ==================
