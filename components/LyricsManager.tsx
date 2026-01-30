@@ -13,16 +13,41 @@ export const LyricsManager: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingLyrics, setEditingLyrics] = useState<LyricsItem | null>(null);
-  // Avoid using Player context to prevent HMR boundary errors; rely on localStorage
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [hasInitialLoaded, setHasInitialLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // show local immediately
-    loadLyrics();
-    // then sync from backend and refresh
-    lyricsApi.syncFromServer().then((items) => {
-      setAllLyrics(items);
-      setAlbums(lyricsApi.getUniqueAlbums());
-    });
+    try {
+      console.log("LyricsManager: Initializing...");
+      // show local immediately
+      loadLyrics();
+      setHasInitialLoaded(true);
+
+      // then sync from backend and refresh
+      setIsSyncing(true);
+      lyricsApi
+        .syncFromServer()
+        .then((items) => {
+          console.log(
+            `LyricsManager: Sync complete, found ${items?.length || 0} items`,
+          );
+          if (items) {
+            setAllLyrics(items);
+            setAlbums(lyricsApi.getUniqueAlbums());
+          }
+          setIsSyncing(false);
+        })
+        .catch((err) => {
+          console.error("LyricsManager: Sync failed", err);
+          setIsSyncing(false);
+          // Don't set error here as we still have local data
+        });
+    } catch (err) {
+      console.error("LyricsManager: Initialization error", err);
+      setError("Failed to load lyrics library. Please try again.");
+      setHasInitialLoaded(true);
+    }
   }, []);
 
   const loadLyrics = () => {
@@ -120,7 +145,22 @@ export const LyricsManager: React.FC = () => {
   }, [lastPlayed, allLyrics]);
 
   return (
-    <div className="flex flex-col md:flex-row bg-black text-white w-full min-h-[400px] overflow-hidden">
+    <div className="flex flex-col md:flex-row bg-black text-white w-full min-h-[calc(100vh-200px)] overflow-hidden rounded-xl border border-zinc-800/50">
+      {error && (
+        <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-6 text-center">
+          <div className="max-w-md">
+            <i className="fa-solid fa-triangle-exclamation text-fossils-red text-5xl mb-4"></i>
+            <h3 className="text-xl font-bold mb-2">Something went wrong</h3>
+            <p className="text-zinc-400 mb-6">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-fossils-red text-white rounded-lg font-bold hover:bg-red-700 transition"
+            >
+              Reload Page
+            </button>
+          </div>
+        </div>
+      )}
       <div className="w-full md:w-64 bg-zinc-950 md:border-r border-zinc-800 flex flex-col border-b md:border-b-0">
         <div className="p-4 border-b border-zinc-800">
           <h2 className="text-[clamp(1rem,2.5vw,1.25rem)] font-bold flex items-center gap-2">
@@ -154,95 +194,132 @@ export const LyricsManager: React.FC = () => {
               setEditingLyrics(null);
               setShowForm(true);
             }}
-            className="px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition font-semibold text-sm"
+            className="px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition font-semibold text-sm flex items-center gap-2"
           >
+            {isSyncing && (
+              <i className="fa-solid fa-circle-notch animate-spin"></i>
+            )}
             Add Lyrics
           </button>
         </div>
-        {lastPlayed && lastPlayedAlbum && (
-          <div className="p-6 border-b border-zinc-800 bg-zinc-900/30">
-            <div className="flex items-center gap-4">
-              <img
-                src={lastPlayedAlbum.image}
-                className="w-16 h-16 rounded-md shadow"
-              />
-              <div className="flex-1">
-                <p className="text-xs text-zinc-400 uppercase tracking-wider">
-                  Last Played
-                </p>
-                <p className="text-[clamp(0.95rem,2.5vw,1.125rem)] font-bold">
-                  {lastPlayed.name}
-                </p>
-                <p className="text-xs text-zinc-500">{lastPlayed.albumName}</p>
-              </div>
-              <div className="flex gap-2">
-                {lastPlayedHasLyrics ? (
-                  <button
-                    onClick={() => {
-                      setSelectedAlbum(lastPlayed.albumName);
-                    }}
-                    className="px-3 py-2 bg-fossils-red text-white rounded-lg text-sm hover:bg-red-700 transition"
-                  >
-                    View Lyrics
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setEditingLyrics(null);
-                      setShowForm(true);
-                    }}
-                    className="px-3 py-2 bg-zinc-800 text-white rounded-lg text-sm hover:bg-zinc-700 transition"
-                  >
-                    Add Lyrics
-                  </button>
-                )}
-              </div>
-            </div>
+        {!hasInitialLoaded ? (
+          <div className="p-12 flex flex-col items-center justify-center text-zinc-500">
+            <i className="fa-solid fa-circle-notch animate-spin text-4xl mb-4 text-fossils-red"></i>
+            <p className="text-lg font-medium">
+              Initializing lyrics library...
+            </p>
           </div>
-        )}
-        {!selectedAlbum ? (
-          <div className="p-6 space-y-10">
-            {displayAlbums.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-zinc-500 p-8">
-                <div className="text-center">
-                  <i className="fa-solid fa-music text-4xl mb-4 block"></i>
-                  <p>No matching albums. Try another search.</p>
-                </div>
-              </div>
-            ) : (
-              displayAlbums.map((album) => {
-                const items = albumLyricsMap.get(album) || [];
-                if (items.length === 0) return null;
-                return (
-                  <div key={album} className="space-y-4">
-                    <div className="px-2">
-                      <h3 className="text-[clamp(1.25rem,3vw,2rem)] font-black">
-                        {album}
-                      </h3>
-                      <p className="text-xs text-zinc-400 mt-1">
-                        {items.length}{" "}
-                        {items.length === 1 ? "entry" : "entries"}
-                      </p>
-                    </div>
-                    <SongList
-                      albumName={album}
-                      lyrics={items}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                    />
-                  </div>
-                );
-              })
-            )}
+        ) : isSyncing && allLyrics.length === 0 ? (
+          <div className="p-12 flex flex-col items-center justify-center text-zinc-500">
+            <i className="fa-solid fa-circle-notch animate-spin text-4xl mb-4 text-fossils-red"></i>
+            <p className="text-lg font-medium">Syncing lyrics from server...</p>
           </div>
         ) : (
-          <SongList
-            albumName={selectedAlbum}
-            lyrics={albumLyricsMap.get(selectedAlbum) || []}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            initialSelectedSong={lastPlayed?.name || null}
-          />
+          <>
+            {lastPlayed && lastPlayedAlbum && (
+              <div className="p-6 border-b border-zinc-800 bg-zinc-900/30">
+                <div className="flex items-center gap-4">
+                  <img
+                    src={lastPlayedAlbum.image}
+                    className="w-16 h-16 rounded-md shadow"
+                  />
+                  <div className="flex-1">
+                    <p className="text-xs text-zinc-400 uppercase tracking-wider">
+                      Last Played
+                    </p>
+                    <p className="text-[clamp(0.95rem,2.5vw,1.125rem)] font-bold">
+                      {lastPlayed.name}
+                    </p>
+                    <p className="text-xs text-zinc-500">
+                      {lastPlayed.albumName}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    {lastPlayedHasLyrics ? (
+                      <button
+                        onClick={() => {
+                          setSelectedAlbum(lastPlayed.albumName);
+                        }}
+                        className="px-3 py-2 bg-fossils-red text-white rounded-lg text-sm hover:bg-red-700 transition"
+                      >
+                        View Lyrics
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setEditingLyrics(null);
+                          setShowForm(true);
+                        }}
+                        className="px-3 py-2 bg-zinc-800 text-white rounded-lg text-sm hover:bg-zinc-700 transition"
+                      >
+                        Add Lyrics
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            {!selectedAlbum ? (
+              <div className="p-6 space-y-10">
+                {displayAlbums.length === 0 ||
+                Array.from(albumLyricsMap.keys()).length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-zinc-500 py-20">
+                    <i className="fa-solid fa-music text-6xl mb-6 opacity-20"></i>
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      No Lyrics Yet
+                    </h3>
+                    <p className="max-w-xs text-center mb-8">
+                      Your lyrics library is empty. Add lyrics for your favorite
+                      Fossils songs to get started.
+                    </p>
+                    <button
+                      onClick={() => setShowForm(true)}
+                      className="px-6 py-3 bg-fossils-red text-white rounded-full font-bold hover:scale-105 transition active:scale-95"
+                    >
+                      Add Your First Lyrics
+                    </button>
+                  </div>
+                ) : (
+                  displayAlbums.map((album) => {
+                    const items = albumLyricsMap.get(album) || [];
+                    if (items.length === 0) return null;
+                    return (
+                      <div
+                        key={album}
+                        className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
+                      >
+                        <div className="px-2">
+                          <h3 className="text-[clamp(1.25rem,3vw,2rem)] font-black">
+                            {album}
+                          </h3>
+                          <p className="text-xs text-zinc-400 mt-1">
+                            {items.length}{" "}
+                            {items.length === 1 ? "entry" : "entries"}
+                          </p>
+                        </div>
+                        <SongList
+                          albumName={album}
+                          lyrics={items}
+                          onEdit={handleEdit}
+                          onDelete={handleDelete}
+                        />
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            ) : (
+              <div className="h-full animate-in fade-in duration-500">
+                <SongList
+                  albumName={selectedAlbum}
+                  lyrics={albumLyricsMap.get(selectedAlbum) || []}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  initialSelectedSong={lastPlayed?.name || null}
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
 

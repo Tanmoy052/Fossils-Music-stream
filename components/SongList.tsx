@@ -1,19 +1,13 @@
-import React, { useState } from 'react';
-type LyricsItem = {
-  id: string;
-  songName: string;
-  timestamp: string;
-  text: string;
-  createdAt?: string;
-  updatedAt?: string;
-};
-import { LyricsItems } from './LyricsItems';
+import React, { useState } from "react";
+import { LyricsItem } from "../types";
+import { LyricsItems } from "./LyricsItems";
 
 interface SongListProps {
   albumName: string;
   lyrics: LyricsItem[];
   onEdit: (lyrics: LyricsItem) => void;
   onDelete: (id: string) => void;
+  initialSelectedSong?: string | null;
 }
 
 export const SongList: React.FC<SongListProps> = ({
@@ -21,11 +15,21 @@ export const SongList: React.FC<SongListProps> = ({
   lyrics,
   onEdit,
   onDelete,
+  initialSelectedSong = null,
 }) => {
-  const [selectedSong, setSelectedSong] = useState<string | null>(null);
+  const [selectedSong, setSelectedSong] = React.useState<string | null>(
+    initialSelectedSong,
+  );
+
+  React.useEffect(() => {
+    if (initialSelectedSong && !selectedSong) {
+      const hasSong = lyrics.some((l) => l.songName === initialSelectedSong);
+      if (hasSong) setSelectedSong(initialSelectedSong);
+    }
+  }, [initialSelectedSong, lyrics]);
 
   const songs = Array.from(
-    new Map(lyrics.map((item) => [item.songName, item])).keys()
+    new Map(lyrics.map((item) => [item.songName, item])).keys(),
   );
 
   const songLyrics = selectedSong
@@ -49,7 +53,7 @@ export const SongList: React.FC<SongListProps> = ({
           <div className="space-y-1 p-4">
             {songs.map((song) => {
               const songCount = lyrics.filter(
-                (item) => item.songName === song
+                (item) => item.songName === song,
               ).length;
               return (
                 <button
@@ -57,13 +61,13 @@ export const SongList: React.FC<SongListProps> = ({
                   onClick={() => setSelectedSong(song)}
                   className={`w-full text-left px-3 py-2 rounded-lg transition ${
                     selectedSong === song
-                      ? 'bg-fossils-red text-white'
-                      : 'text-zinc-300 hover:bg-zinc-800'
+                      ? "bg-fossils-red text-white"
+                      : "text-zinc-300 hover:bg-zinc-800"
                   }`}
                 >
                   <p className="font-semibold truncate text-sm">{song}</p>
                   <p className="text-xs text-zinc-400">
-                    {songCount} {songCount === 1 ? 'entry' : 'entries'}
+                    {songCount} {songCount === 1 ? "entry" : "entries"}
                   </p>
                 </button>
               );

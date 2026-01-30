@@ -1,11 +1,5 @@
-interface LyricsItem {
-  id: string;
-  albumName: string;
-  songName: string;
-  bengaliLyrics: string;
-  createdAt: number;
-}
 import { ALBUMS } from "../constants";
+import { LyricsItem } from "../types";
 
 const LYRICS_STORAGE_KEY = "fossils:lyrics";
 const API_BASE =

@@ -92,6 +92,14 @@ function AppContent() {
         />
 
         <main className="flex-1 flex flex-col relative bg-zinc-950 overflow-hidden">
+          {isLoading && (
+            <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 border-4 border-fossils-red border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="text-zinc-300 font-medium">Loading...</p>
+              </div>
+            </div>
+          )}
           <div className="flex-1 overflow-y-auto pb-0 scrollbar-hide">
             <div className="max-w-7xl mx-auto w-full">
             {activeView === "home" && (

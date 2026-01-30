@@ -1,12 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-type LyricsItem = {
-  id: string;
-  albumName: string;
-  songName: string;
-  bengaliLyrics: string;
-  createdAt: string;
-};
-import { lyricsApi } from '../services/lyricsApi';
+import React, { useState, useRef, useEffect } from "react";
+import { LyricsItem } from "../types";
+import { lyricsApi } from "../services/lyricsApi";
 
 interface LyricsItemsProps {
   lyrics: LyricsItem[];
@@ -27,8 +21,8 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
 }) => {
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
-  const [renameType, setRenameType] = useState<'album' | 'song' | null>(null);
-  const [renameValue, setRenameValue] = useState('');
+  const [renameType, setRenameType] = useState<"album" | "song" | null>(null);
+  const [renameValue, setRenameValue] = useState("");
   const [selectedLyricsForView, setSelectedLyricsForView] =
     useState<LyricsItem | null>(null);
   const [fontSize, setFontSize] = useState(28);
@@ -47,8 +41,8 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Auto-scale lyrics to fit viewport
@@ -61,7 +55,7 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
         // Available height: viewport - header (120px) - margins (40px)
         const availableHeight = window.innerHeight - 160;
         const lineCount =
-          selectedLyricsForView.bengaliLyrics.split('\n').length;
+          selectedLyricsForView.bengaliLyrics.split("\n").length;
         const charCount = selectedLyricsForView.bengaliLyrics.length;
 
         // Determine initial size based on content length
@@ -115,8 +109,8 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
       };
 
       calculateOptimalSize();
-      window.addEventListener('resize', calculateOptimalSize);
-      return () => window.removeEventListener('resize', calculateOptimalSize);
+      window.addEventListener("resize", calculateOptimalSize);
+      return () => window.removeEventListener("resize", calculateOptimalSize);
     }
   }, [selectedLyricsForView]);
 
@@ -129,7 +123,7 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
     const item = lyrics.find((l) => l.id === lyricsId);
     if (item) {
       setRenamingId(lyricsId);
-      setRenameType('album');
+      setRenameType("album");
       setRenameValue(item.albumName);
       setContextMenu(null);
     }
@@ -139,7 +133,7 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
     const item = lyrics.find((l) => l.id === lyricsId);
     if (item) {
       setRenamingId(lyricsId);
-      setRenameType('song');
+      setRenameType("song");
       setRenameValue(item.songName);
       setContextMenu(null);
     }
@@ -148,19 +142,19 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
   const handleConfirmRename = (lyricsId: string) => {
     const item = lyrics.find((l) => l.id === lyricsId);
     if (item && renameType) {
-      if (renameType === 'album') {
+      if (renameType === "album") {
         lyricsApi.updateLyrics(
           lyricsId,
           renameValue,
           item.songName,
-          item.bengaliLyrics
+          item.bengaliLyrics,
         );
       } else {
         lyricsApi.updateLyrics(
           lyricsId,
           item.albumName,
           renameValue,
-          item.bengaliLyrics
+          item.bengaliLyrics,
         );
       }
       setRenamingId(null);
@@ -239,7 +233,7 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
             <div
               ref={contextMenuRef}
               style={{
-                position: 'fixed',
+                position: "fixed",
                 left: `${contextMenu.x}px`,
                 top: `${contextMenu.y}px`,
                 zIndex: 1000,
@@ -297,7 +291,7 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-1001">
               <div className="bg-zinc-800 rounded-lg p-6 w-80">
                 <p className="text-sm text-zinc-300 mb-3">
-                  Rename {renameType === 'album' ? 'Album' : 'Song'}:
+                  Rename {renameType === "album" ? "Album" : "Song"}:
                 </p>
                 <input
                   type="text"
@@ -337,7 +331,7 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
         >
           <div
             className="bg-zinc-900 border border-zinc-800 rounded-lg w-full max-w-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300"
-            style={{ height: 'calc(100vh - 32px)', maxHeight: '95vh' }}
+            style={{ height: "calc(100vh - 32px)", maxHeight: "95vh" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -351,13 +345,13 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
                 </h2>
                 <p className="text-sm text-zinc-400">
                   {new Date(selectedLyricsForView.createdAt).toLocaleDateString(
-                    'en-US',
+                    "en-US",
                     {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    }
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    },
                   )}
                 </p>
               </div>
@@ -405,7 +399,7 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
                   lyricsApi.downloadPDF(
                     selectedLyricsForView.albumName,
                     selectedLyricsForView.songName,
-                    selectedLyricsForView.bengaliLyrics
+                    selectedLyricsForView.bengaliLyrics,
                   );
                 }}
                 className="flex-1 px-4 py-3 bg-fossils-red hover:bg-red-700 text-white rounded-lg transition font-semibold"
