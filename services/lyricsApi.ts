@@ -5,7 +5,7 @@ const LYRICS_STORAGE_KEY = "fossils:lyrics";
 const API_BASE =
   (typeof import.meta !== "undefined" &&
     (import.meta as any).env?.VITE_LYRICS_API_URL) ||
-  "http://localhost:4000/api";
+  "https://fossils-music-stream.onrender.com/api";
 
 const safeFetch = async (input: RequestInfo, init?: RequestInit) => {
   try {
