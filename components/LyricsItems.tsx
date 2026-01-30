@@ -54,9 +54,9 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
 
         // Available height: viewport - header (120px) - margins (40px)
         const availableHeight = window.innerHeight - 160;
-        const lineCount =
-          selectedLyricsForView.bengaliLyrics.split("\n").length;
-        const charCount = selectedLyricsForView.bengaliLyrics.length;
+        const lyricsText = selectedLyricsForView.bengaliLyrics || "";
+        const lineCount = lyricsText.split("\n").length;
+        const charCount = lyricsText.length;
 
         // Determine initial size based on content length
         let baseFontSize = 18;
@@ -211,14 +211,23 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
                 {item.songName}
               </p>
               <p className="text-xs text-zinc-400 mt-1">
-                {new Date(item.createdAt).toLocaleDateString()}
+                {(() => {
+                  try {
+                    const date = new Date(item.createdAt);
+                    return isNaN(date.getTime())
+                      ? "Recently added"
+                      : date.toLocaleDateString();
+                  } catch (e) {
+                    return "Recently added";
+                  }
+                })()}
               </p>
             </div>
 
             {/* Lyrics Preview */}
             <div className="flex-1">
               <p className="text-xs text-zinc-300 line-clamp-4 leading-relaxed cursor-pointer hover:text-white transition">
-                {item.bengaliLyrics}
+                {item.bengaliLyrics || "No lyrics content."}
               </p>
             </div>
 
@@ -344,15 +353,20 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
                   {selectedLyricsForView.songName}
                 </h2>
                 <p className="text-sm text-zinc-400">
-                  {new Date(selectedLyricsForView.createdAt).toLocaleDateString(
-                    "en-US",
-                    {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    },
-                  )}
+                  {(() => {
+                    try {
+                      const date = new Date(selectedLyricsForView.createdAt);
+                      if (isNaN(date.getTime())) return "Recently added";
+                      return date.toLocaleDateString("en-US", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      });
+                    } catch (e) {
+                      return "Recently added";
+                    }
+                  })()}
                 </p>
               </div>
               <button
@@ -379,7 +393,8 @@ export const LyricsItems: React.FC<LyricsItemsProps> = ({
                   margin: 0,
                 }}
               >
-                {selectedLyricsForView.bengaliLyrics}
+                {selectedLyricsForView.bengaliLyrics ||
+                  "No lyrics content available."}
               </p>
             </div>
 
