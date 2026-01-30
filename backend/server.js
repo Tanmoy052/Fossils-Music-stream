@@ -110,7 +110,8 @@ async function connectMongo() {
 connectMongo();
 
 const server = http.createServer(async (req, res) => {
-  const parsedUrl = url.parse(req.url, true);
+  const baseURL = `http://${req.headers.host || "localhost"}`;
+  const parsedUrl = new URL(req.url, baseURL);
   const pathname = parsedUrl.pathname || "";
 
   // ---- CORS Preflight ----
