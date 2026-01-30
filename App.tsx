@@ -6,6 +6,7 @@ import { SearchBar } from "./components/SearchBar";
 import { AlbumCard } from "./components/AlbumCard";
 import { AlbumDetail } from "./components/AlbumDetail";
 import { LyricsManager } from "./components/LyricsManager";
+import { Hero } from "./components/Hero";
 import { FooterLinks } from "./components/FooterLinks";
 import { HERO_BG_URL } from "./content/hero";
 import { api } from "./services/api";
@@ -68,6 +69,16 @@ function AppContent() {
     }
   }, []);
 
+  const handleStartListening = useCallback(async () => {
+    if (albums.length > 0) {
+      const firstAlbum = albums[0];
+      const songs = await api.getSongsByAlbum(firstAlbum.id);
+      if (songs && songs.length > 0) {
+        playSong(songs[0], songs);
+      }
+    }
+  }, [albums, playSong]);
+
   return (
     <div className="flex flex-col min-h-dvh bg-black text-white antialiased">
       <div className="flex flex-1">
@@ -95,7 +106,7 @@ function AppContent() {
             <div className="max-w-7xl mx-auto w-full">
               {activeView === "home" && (
                 <>
-                  <div className="relative h-[420px] bg-fossils-gradient"></div>
+                  <Hero onStartListening={handleStartListening} />
 
                   <div className="p-10">
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
@@ -117,9 +128,7 @@ function AppContent() {
                 <AlbumDetail
                   album={viewData.album}
                   songs={viewData.songs}
-                  onPlaySong={(song) =>
-                    playSong(song, viewData.songs)
-                  }
+                  onPlaySong={(song) => playSong(song, viewData.songs)}
                 />
               )}
 
