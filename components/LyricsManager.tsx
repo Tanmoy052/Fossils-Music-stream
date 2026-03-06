@@ -205,8 +205,8 @@ export const LyricsManager: React.FC = () => {
           </div>
         </div>
       )}
-      <div className="w-full md:w-64 bg-zinc-950 md:border-r border-zinc-800 flex flex-col border-b md:border-b-0">
-        <div className="p-4 border-b border-zinc-800">
+      <div className="w-full md:w-64 bg-zinc-950 md:border-r border-zinc-800 flex flex-col border-b md:border-b-0 max-h-60 md:max-h-none">
+        <div className="p-4 border-b border-zinc-800 sticky top-0 bg-zinc-950 z-10">
           <h2 className="text-[clamp(1rem,2.5vw,1.25rem)] font-bold flex items-center gap-2">
             <i className="fa-solid fa-magnifying-glass"></i>
             Lyrics
@@ -369,15 +369,15 @@ export const LyricsManager: React.FC = () => {
 
       {showForm && (
         <div
-          className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-4"
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-4 backdrop-blur-sm"
           onClick={() => setShowForm(false)}
         >
           <div
-            className="bg-zinc-900 border border-zinc-800 rounded-lg w-full max-w-2xl overflow-hidden"
+            className="bg-zinc-900 border border-zinc-800 rounded-lg w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="border-b border-zinc-800 p-4 flex items-center justify-between">
-              <h3 className="font-bold">Add Lyrics</h3>
+            <div className="border-b border-zinc-800 p-4 flex items-center justify-between shrink-0">
+              <h3 className="font-bold text-lg">Add Lyrics</h3>
               <button
                 onClick={() => setShowForm(false)}
                 className="text-zinc-400 hover:text-white transition text-xl w-8 h-8 flex items-center justify-center hover:bg-zinc-800 rounded-lg"
@@ -385,11 +385,13 @@ export const LyricsManager: React.FC = () => {
                 <i className="fa-solid fa-times"></i>
               </button>
             </div>
-            <LyricsForm
-              editingLyrics={editingLyrics}
-              onSave={handleSave}
-              onCancel={() => setShowForm(false)}
-            />
+            <div className="flex-1 overflow-y-auto">
+              <LyricsForm
+                editingLyrics={editingLyrics}
+                onSave={handleSave}
+                onCancel={() => setShowForm(false)}
+              />
+            </div>
           </div>
         </div>
       )}

@@ -29,11 +29,30 @@ export const Player: React.FC = () => {
     );
 
   return (
-    <div className="fixed bottom-0 left-0 z-50 h-[80px] w-full bg-black border-t border-zinc-800 px-6 flex items-center justify-between">
-      <div className="flex items-center gap-4 w-1/4">
+    <div className="fixed bottom-0 left-0 z-50 h-[80px] w-full bg-black border-t border-zinc-800 px-4 sm:px-6 flex items-center justify-between">
+      {/* Mobile Progress Bar */}
+      <div
+        className="absolute top-0 left-0 w-full h-3 -mt-1.5 bg-transparent sm:hidden cursor-pointer group flex items-center"
+        onClick={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const percent = (e.clientX - rect.left) / rect.width;
+          seek(percent * currentSong.durationSeconds);
+        }}
+      >
+        <div className="w-full h-1 bg-zinc-800 relative">
+          <div
+            className="h-full bg-fossils-red relative"
+            style={{ width: `${isNaN(progress) ? 0 : progress}%` }}
+          >
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 sm:gap-4 w-1/2 sm:w-1/4">
         <img
           src={currentSong.albumImage}
-          className="w-14 h-14 rounded shadow-2xl"
+          className="w-12 h-12 sm:w-14 sm:h-14 rounded shadow-2xl"
           alt={currentSong.name}
         />
         <div className="min-w-0">
@@ -46,8 +65,8 @@ export const Player: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-2 max-w-[700px] w-1/2">
-        <div className="flex items-center gap-8">
+      <div className="flex flex-col items-center gap-2 max-w-[700px] w-auto sm:w-1/2">
+        <div className="flex items-center gap-4 sm:gap-8">
           <button
             onClick={playPrev}
             className="text-zinc-400 hover:text-white transition"
@@ -69,7 +88,7 @@ export const Player: React.FC = () => {
             <i className="fa-solid fa-forward-step text-xl"></i>
           </button>
         </div>
-        <div className="flex items-center gap-3 w-full group">
+        <div className="hidden sm:flex items-center gap-3 w-full group">
           <span className="text-[11px] font-mono text-zinc-500">
             {formatTime(currentTime)}
           </span>
@@ -93,7 +112,7 @@ export const Player: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-5 w-1/4">
+      <div className="hidden sm:flex items-center justify-end gap-5 w-1/4">
         <div className="flex items-center gap-3 w-28">
           <i className="fa-solid fa-volume-high text-zinc-500 text-sm"></i>
           <input

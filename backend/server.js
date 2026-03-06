@@ -1,15 +1,16 @@
-// Pure Node.js HTTP Server with MongoDB (Permanent Storage)
+// Pure Node.js HTTP Server with MongoDB Persistence
 
 const http = require("http");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const path = require("path");
 const dns = require("dns");
 
-dotenv.config();
+// Fix DNS resolution issues
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
-if (process.env.DNS_SERVER) {
-  dns.setServers([process.env.DNS_SERVER]);
-}
+// Load .env from the same directory as this script
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 // ================== CONFIG ==================
 const PORT = process.env.PORT || 4000;
@@ -40,7 +41,7 @@ function parseBody(req) {
   });
 }
 
-// ================== DATABASE ==================
+// ================== DATABASE (MongoDB) ==================
 let dbReady = false;
 
 const LyricsSchema = new mongoose.Schema(
@@ -53,18 +54,34 @@ const LyricsSchema = new mongoose.Schema(
   { collection: "lyrics" },
 );
 
+// Add a virtual 'id' field that maps to '_id'
+LyricsSchema.virtual("id").get(function () {
+  return this._id.toHexString();
+});
+
+// Ensure virtual fields are serialized
+LyricsSchema.set("toJSON", {
+  virtuals: true,
+  transform: function (doc, ret) {
+    delete ret._id;
+    delete ret.__v;
+  },
+});
+
 const Lyrics = mongoose.model("Lyrics", LyricsSchema);
 
 async function connectMongo() {
   try {
-    await mongoose.connect(MONGO_URI, {
-      serverSelectionTimeoutMS: 6000,
-    });
+    if (!MONGO_URI) {
+      console.error("❌ MONGO_URI is missing in .env");
+      return;
+    }
+    await mongoose.connect(MONGO_URI);
     dbReady = true;
     console.log("✅ MongoDB Connected");
   } catch (err) {
     console.error("❌ MongoDB connection failed:", err.message);
-    process.exit(1); // stop server if DB fails
+    // Don't exit process, allow server to run but DB operations will fail
   }
 }
 
@@ -72,10 +89,7 @@ connectMongo();
 
 // ================== SERVER ==================
 const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const pathname = url.pathname;
-
-  // ---- CORS ----
+  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     res.writeHead(204, {
       "Access-Control-Allow-Origin": "*",
@@ -85,80 +99,98 @@ const server = http.createServer(async (req, res) => {
     return res.end();
   }
 
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const pathname = url.pathname;
+
   // ---- Health ----
   if (pathname === "/api/health" && req.method === "GET") {
-    return sendJson(res, 200, { ok: true, db: dbReady });
+    return sendJson(res, 200, { ok: true, db: dbReady, type: "mongodb" });
   }
 
   // ---- GET ALL LYRICS ----
   if (pathname === "/api/lyrics" && req.method === "GET") {
-    const list = await Lyrics.find().sort({ createdAt: 1 }).lean();
-    const normalized = list.map((l) => ({
-      id: l._id.toString(),
-      albumName: l.albumName,
-      songName: l.songName,
-      bengaliLyrics: l.bengaliLyrics,
-      createdAt: l.createdAt,
-    }));
-    return sendJson(res, 200, normalized);
+    if (!dbReady) return sendJson(res, 503, { error: "Database not ready" });
+    try {
+      const list = await Lyrics.find().sort({ createdAt: -1 });
+      return sendJson(res, 200, list);
+    } catch (err) {
+      return sendJson(res, 500, { error: err.message });
+    }
   }
 
   // ---- ADD LYRICS ----
   if (pathname === "/api/lyrics" && req.method === "POST") {
-    const { albumName, songName, bengaliLyrics } = await parseBody(req);
-
-    if (!albumName || !songName || !bengaliLyrics) {
-      return sendJson(res, 400, { error: "Missing fields" });
-    }
-
-    const saved = await Lyrics.create({
-      albumName,
-      songName,
-      bengaliLyrics,
-    });
-
-    return sendJson(res, 201, {
-      id: saved._id.toString(),
-      albumName: saved.albumName,
-      songName: saved.songName,
-      bengaliLyrics: saved.bengaliLyrics,
-      createdAt: saved.createdAt,
-    });
-  }
-
-  // ---- UPDATE / DELETE ----
-  const match = pathname.match(/^\/api\/lyrics\/(.+)$/);
-  if (match) {
-    const id = match[1];
-
-    if (req.method === "PUT") {
+    if (!dbReady) return sendJson(res, 503, { error: "Database not ready" });
+    try {
       const body = await parseBody(req);
-      const updated = await Lyrics.findByIdAndUpdate(id, body, { new: true });
+      const { albumName, songName, bengaliLyrics } = body;
 
-      if (!updated) {
-        return sendJson(res, 404, { error: "Not found" });
+      if (!albumName || !songName || !bengaliLyrics) {
+        return sendJson(res, 400, { error: "Missing required fields" });
       }
 
-      return sendJson(res, 200, {
-        id: updated._id.toString(),
-        albumName: updated.albumName,
-        songName: updated.songName,
-        bengaliLyrics: updated.bengaliLyrics,
-        createdAt: updated.createdAt,
+      const newLyric = new Lyrics({
+        albumName,
+        songName,
+        bengaliLyrics,
       });
-    }
 
-    if (req.method === "DELETE") {
-      const deleted = await Lyrics.findByIdAndDelete(id);
-      return sendJson(res, 200, { ok: !!deleted });
+      await newLyric.save();
+      return sendJson(res, 201, newLyric);
+    } catch (err) {
+      return sendJson(res, 500, { error: err.message });
     }
   }
 
-  // ---- NOT FOUND ----
-  sendJson(res, 404, { error: "Not found" });
+  // ---- UPDATE LYRICS ----
+  // Matches /api/lyrics/:id
+  const updateMatch = pathname.match(/^\/api\/lyrics\/([^\/]+)$/);
+  if (updateMatch && req.method === "PUT") {
+    if (!dbReady) return sendJson(res, 503, { error: "Database not ready" });
+    try {
+      const id = updateMatch[1];
+      const body = await parseBody(req);
+      const { albumName, songName, bengaliLyrics } = body;
+
+      const updatedLyric = await Lyrics.findByIdAndUpdate(
+        id,
+        { albumName, songName, bengaliLyrics },
+        { new: true }, // Return the updated document
+      );
+
+      if (!updatedLyric) {
+        return sendJson(res, 404, { error: "Lyrics not found" });
+      }
+
+      return sendJson(res, 200, updatedLyric);
+    } catch (err) {
+      return sendJson(res, 500, { error: err.message });
+    }
+  }
+
+  // ---- DELETE LYRICS ----
+  const deleteMatch = pathname.match(/^\/api\/lyrics\/([^\/]+)$/);
+  if (deleteMatch && req.method === "DELETE") {
+    if (!dbReady) return sendJson(res, 503, { error: "Database not ready" });
+    try {
+      const id = deleteMatch[1];
+      const result = await Lyrics.findByIdAndDelete(id);
+
+      if (!result) {
+        return sendJson(res, 404, { error: "Lyrics not found" });
+      }
+
+      return sendJson(res, 200, { success: true });
+    } catch (err) {
+      return sendJson(res, 500, { error: err.message });
+    }
+  }
+
+  // 404
+  sendJson(res, 404, { error: "Not Found" });
 });
 
-// ================== START ==================
-server.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`🚀 Backend Server running on http://localhost:${PORT}`);
+  console.log(`🔌 Connecting to MongoDB...`);
 });

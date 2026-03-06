@@ -1,12 +1,10 @@
 import React from "react";
-import { Album, Playlist, ViewType } from "../types";
+import { Link, useLocation } from "react-router-dom";
+import { Album, Playlist } from "../types";
 
 interface SidebarProps {
   albums: Album[];
   playlists: Playlist[];
-  activeView: ViewType;
-  onNavigate: (view: ViewType, id?: string) => void;
-  selectedId?: string;
   isCollapsed?: boolean;
   isDrawerOpen?: boolean;
   toggleCollapse?: () => void;
@@ -16,21 +14,39 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({
   albums,
   playlists,
-  activeView,
-  onNavigate,
-  selectedId,
   isCollapsed = false,
   isDrawerOpen = false,
   toggleCollapse,
   closeDrawer,
 }) => {
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  const isActive = (path: string) => {
+    if (path === "/") return currentPath === "/";
+    return currentPath.startsWith(path);
+  };
+
+  const handleLinkClick = () => {
+    closeDrawer && closeDrawer(false);
+  };
+
   return (
-    <div
-      className={`fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out
-      ${isDrawerOpen ? "translate-x-0" : "-translate-x-full"} 
-      sm:translate-x-0 sm:static sm:z-auto 
-      ${isCollapsed ? "w-16" : "w-64"} flex flex-col h-full border-r border-zinc-800 shrink-0 bg-zinc-950`}
-    >
+    <>
+      {/* Mobile Backdrop */}
+      {isDrawerOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 sm:hidden transition-opacity"
+          onClick={() => closeDrawer && closeDrawer(false)}
+        />
+      )}
+      
+      <div
+        className={`fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out
+        ${isDrawerOpen ? "translate-x-0" : "-translate-x-full"} 
+        sm:translate-x-0 sm:static sm:z-auto 
+        ${isCollapsed ? "w-16" : "w-64"} flex flex-col h-full border-r border-zinc-800 shrink-0 bg-zinc-950`}
+      >
       <div className="p-6 pb-0 relative">
         <button
           className="hidden md:block absolute top-2 right-2 p-2 bg-zinc-900 rounded-full"
@@ -43,12 +59,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             } text-white`}
           ></i>
         </button>
-        <div
-          className="mb-10 cursor-pointer group"
-          onClick={() => {
-            onNavigate("home");
-            closeDrawer && closeDrawer(false);
-          }}
+        <Link
+          to="/"
+          className="mb-10 cursor-pointer group block"
+          onClick={handleLinkClick}
         >
           <div className="tracking-tighter flex flex-col">
             <span className="font-black text-white text-[clamp(1.75rem,4vw,2.5rem)]">
@@ -63,39 +77,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {!isCollapsed && (
             <div className="h-1 w-12 bg-spotify-green mt-2 group-hover:w-full transition-all duration-500"></div>
           )}
-        </div>
+        </Link>
 
         <nav className="space-y-4 mb-8">
-          <button
-            onClick={() => {
-              onNavigate("home");
-              closeDrawer && closeDrawer(false);
-            }}
-            className={`flex items-center gap-4 w-full text-left font-semibold transition hover:text-white ${activeView === "home" ? "text-white" : "text-zinc-300"}`}
+          <Link
+            to="/"
+            onClick={handleLinkClick}
+            className={`flex items-center gap-4 w-full text-left font-semibold transition hover:text-white ${isActive("/") ? "text-fossils-red" : "text-zinc-300"}`}
           >
             <i className="fa-solid fa-house text-xl"></i>
             {!isCollapsed && "Home"}
-          </button>
-          <button
-            onClick={() => {
-              onNavigate("search");
-              closeDrawer && closeDrawer(false);
-            }}
-            className={`flex items-center gap-4 w-full text-left font-semibold transition hover:text-white ${activeView === "search" ? "text-white" : "text-zinc-300"}`}
+          </Link>
+          <Link
+            to="/search"
+            onClick={handleLinkClick}
+            className={`flex items-center gap-4 w-full text-left font-semibold transition hover:text-white ${isActive("/search") ? "text-fossils-red" : "text-zinc-300"}`}
           >
             <i className="fa-solid fa-magnifying-glass text-xl"></i>
             {!isCollapsed && "Search"}
-          </button>
-          <button
-            onClick={() => {
-              onNavigate("lyrics");
-              closeDrawer && closeDrawer(false);
-            }}
-            className={`flex items-center gap-4 w-full text-left font-semibold transition hover:text-white ${activeView === "lyrics" ? "text-white" : "text-zinc-300"}`}
+          </Link>
+          <Link
+            to="/lyrics"
+            onClick={handleLinkClick}
+            className={`flex items-center gap-4 w-full text-left font-semibold transition hover:text-white ${isActive("/lyrics") ? "text-fossils-red" : "text-zinc-300"}`}
           >
             <i className="fa-solid fa-music text-xl"></i>
             {!isCollapsed && "Lyrics"}
-          </button>
+          </Link>
         </nav>
       </div>
 
@@ -107,16 +115,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           <div className="space-y-2">
             {playlists.map((pl) => (
-              <button
+              <Link
                 key={pl.id}
-                onClick={() => {
-                  onNavigate("playlist", pl.id);
-                  closeDrawer && closeDrawer(false);
-                }}
-                className={`block w-full text-left text-sm font-medium transition-colors hover:text-white truncate py-1 ${selectedId === pl.id ? "text-spotify-green" : "text-zinc-300"}`}
+                to={`/playlist/${pl.id}`}
+                onClick={handleLinkClick}
+                className={`block w-full text-left text-sm font-medium transition-colors hover:text-white truncate py-1 ${currentPath === `/playlist/${pl.id}` ? "text-fossils-red" : "text-zinc-300"}`}
               >
                 {!isCollapsed && pl.name}
-              </button>
+              </Link>
             ))}
           </div>
         </div>
@@ -128,16 +134,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           <div className="space-y-2">
             {albums.map((album) => (
-              <button
+              <Link
                 key={album.id}
-                onClick={() => {
-                  onNavigate("album", album.id);
-                  closeDrawer && closeDrawer(false);
-                }}
-                className={`block w-full text-left text-sm font-medium transition-colors hover:text-white truncate py-1 ${selectedId === album.id ? "text-spotify-green" : "text-zinc-300"}`}
+                to={`/album/${album.id}`}
+                onClick={handleLinkClick}
+                className={`block w-full text-left text-sm font-medium transition-colors hover:text-white truncate py-1 ${currentPath === `/album/${album.id}` ? "text-fossils-red" : "text-zinc-300"}`}
               >
                 {!isCollapsed && album.name}
-              </button>
+              </Link>
             ))}
           </div>
         </div>
