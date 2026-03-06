@@ -2,7 +2,7 @@ import { ALBUMS } from "../constants";
 import { LyricsItem } from "../types";
 
 const LYRICS_STORAGE_KEY = "fossils:lyrics";
-const API_BASE = "/api";
+const API_BASE = "https://fossils-music-stream.onrender.com/api";
 
 const safeFetch = async (input: RequestInfo, init?: RequestInit) => {
   try {
