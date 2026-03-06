@@ -223,8 +223,8 @@ export const LyricsManager: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto min-w-0">
-        <div className="border-b border-zinc-800 p-6 flex items-center justify-between">
+      <div className="flex-1 overflow-y-auto min-w-0 relative">
+        <div className="border-b border-zinc-800 p-4 md:p-6 flex items-center justify-between sticky top-0 bg-zinc-950/95 backdrop-blur-sm z-10">
           <div>
             <h2 className="text-[clamp(1.25rem,3vw,2rem)] font-black">
               Lyrics Library

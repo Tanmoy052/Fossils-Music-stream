@@ -32,7 +32,7 @@ export const Player: React.FC = () => {
     <div className="fixed bottom-0 left-0 z-50 h-[80px] w-full bg-black border-t border-zinc-800 px-4 sm:px-6 flex items-center justify-between">
       {/* Mobile Progress Bar */}
       <div
-        className="absolute top-0 left-0 w-full h-3 -mt-1.5 bg-transparent sm:hidden cursor-pointer group flex items-center"
+        className="absolute top-0 left-0 w-full h-4 -mt-2 bg-transparent sm:hidden cursor-pointer group flex items-center z-50"
         onClick={(e) => {
           const rect = e.currentTarget.getBoundingClientRect();
           const percent = (e.clientX - rect.left) / rect.width;

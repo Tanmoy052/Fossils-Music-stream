@@ -19,6 +19,8 @@ body {
   /* ✅ Mobile-safe scrolling */
   overflow-x: hidden;
   overflow-y: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ===== Bengali Font ===== */
